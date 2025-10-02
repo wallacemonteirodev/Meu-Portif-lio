@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfólio Wallace DEV</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  body { font-family:'Helvetica', Arial, sans-serif; line-height:1.6; color:#f5f5f5; background-color:#121212; position:relative; overflow-x:hidden; }
+
+  canvas#particles { position: fixed; top:0; left:0; width:100%; height:100%; z-index:-1; }
+
+  nav{ position: fixed; top:0; width:100%; display:flex; justify-content:space-between; align-items:center; padding:15px 40px; z-index:1000; background: rgba(18,18,18,0.95); box-shadow: 0 2px 10px rgba(0,0,0,0.5); transition: all 0.4s ease;}
+  nav.scrolled { background: #1c1c1c; box-shadow:0 4px 15px rgba(0,0,0,0.6);}
+  nav .logo { font-weight:bold; font-size:24px; color:#4CAF50; }
+  nav ul { display:flex; list-style:none; }
+  nav ul li { margin-left:25px; }
+  nav ul li a { font-size:16px; transition: color 0.3s; position: relative; color:#f5f5f5; }
+  nav ul li a.active::after { content:""; position:absolute; bottom:-5px; left:0; width:100%; height:2px; background:#4CAF50; border-radius:2px; }
+  nav ul li a:hover { color:#81C784; }
+  nav .menu-toggle { display:none; cursor:pointer; font-size:24px; }
+
+  section{ padding:100px 20px; min-height:100vh; display:flex; flex-direction:column; justify-content:center; opacity:0; transform: translateY(20px); transition: all 0.8s ease; }
+  section.visible{ opacity:1; transform: translateY(0); }
+  h1,h2,h3{ margin-bottom:20px; color:#f5f5f5; }
+  h1{ font-size:52px; animation: fadeIn 1.2s ease forwards; }
+  h2{ font-size:36px; }
+  h3{ font-size:22px; }
+  p{ color:#ddd; font-size:18px; }
+
+  @keyframes fadeIn { from{opacity:0; transform: translateY(20px);} to{opacity:1; transform: translateY(0);} }
+
+  /* HERO */
+  #hero{ display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:20px; min-height:100vh; }
+  #hero button{ padding:15px 25px; font-size:18px; background:#4CAF50; border:none; border-radius:8px; color:#fff; cursor:pointer; transition: 0.3s; }
+  #hero button:hover{ background:#45a049; transform:scale(1.05); }
+
+  /* SOBRE COM FOTO */
+  #sobre .sobre-container{ display:flex; flex-wrap:wrap; align-items:center; gap:30px; justify-content:center; }
+  #sobre .sobre-container img{
+    width:200px;
+    height:200px;
+    border-radius:12px;
+    object-fit:cover;
+    border:4px solid #4CAF50;
+    box-shadow:0 4px 15px rgba(0,0,0,0.5);
+  }
+  #sobre .sobre-container .sobre-text{ flex:2; min-width:250px; text-align:center; }
+
+  /* GRID PROJETOS */
+  .grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:25px; }
+  .card{ background:#1f1f1f; color:#f5f5f5; padding:20px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.7); transition: transform 0.4s, box-shadow 0.4s; cursor:pointer; position:relative; overflow:hidden;}
+  .card:hover{ transform: translateY(-10px) scale(1.03); box-shadow:0 12px 25px rgba(0,0,0,0.9); }
+  .card img{ width:100%; border-radius:8px; margin-bottom:15px; }
+  .card .links{ display:flex; justify-content:flex-start; gap:10px; margin-top:10px; }
+  .card .links a{ font-size:18px; color:#4CAF50; transition: color 0.3s; }
+  .card .links a:hover{ color:#81C784; }
+
+  /* CONTATO CLICÁVEL */
+  #contato .contato-container{ display:flex; flex-wrap:wrap; gap:40px; justify-content:center; align-items:center; text-align:center; }
+  .contato-item{ display:flex; flex-direction:column; align-items:center; gap:10px; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+  .contato-item img{ width:80px; height:80px; border-radius:12px; object-fit:cover; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+  .contato-item:hover img{ transform: scale(1.2); box-shadow:0 0 15px #4CAF50; }
+  .contato-item a{ text-decoration:none; color:#f5f5f5; }
+  .contato-item:hover a{ color:#81C784; }
+
+  footer{ text-align:center; padding:25px; font-size:14px; color:#aaa; }
+
+  #back-to-top{ position: fixed; bottom:30px; right:30px; padding:12px 16px; background:#4CAF50; color:#fff; border:none; border-radius:50%; font-size:22px; cursor:pointer; display:none; transition: all 0.3s; }
+  #back-to-top:hover{ background:#45a049; transform:scale(1.1); }
+
+  @media(max-width:768px){
+    nav ul{ flex-direction:column; background:#1c1c1c; position:absolute; top:60px; right:0; width:220px; display:none; box-shadow:0 2px 8px rgba(0,0,0,0.15); padding:15px; }
+    nav ul.show{ display:flex; }
+    nav ul li{ margin:15px 0; }
+    nav .menu-toggle{ display:block; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+
+<nav>
+  <div class="logo">Wallace Monteiro Portifólio</div>
+  <div class="menu-toggle" onclick="document.querySelector('nav ul').classList.toggle('show')">☰</div>
+  <ul>
+    <li><a href="#hero" class="nav-link">Home</a></li>
+    <li><a href="#sobre" class="nav-link">Sobre</a></li>
+    <li><a href="#projetos" class="nav-link">Projetos</a></li>
+    <li><a href="#contato" class="nav-link">Contato</a></li>
+  </ul>
+</nav>
+
+<section id="hero">
+  <h1>Olá, eu sou Wallace Monteiro</h1>
+  <p>Profissional em formação na área de Análise e Desenvolvimento de Sistemas, com conhecimentos sólidos em HTML, CSS, JavaScript, Python, Java POO, C#, algoritmos e lógica de programação.
+Possuo experiência também em suporte técnico, com perfil organizado, criativo e dedicado, sempre em busca de aprimoramento contínuo.
+Tenho como objetivos profissionais atuar como Desenvolvedor Back-end, Front-end ou Full-stack, Analista de Sistemas ou Desenvolvedor de Software, contribuindo para a criação de soluções inovadoras e eficientes.</p>
+  <button onclick="document.querySelector('#projetos').scrollIntoView({behavior:'smooth'})">Veja meus projetos</button>
+</section>
+
+<section id="sobre">
+  <div class="sobre-container">
+    <div>
+      <img src="Imagens/perfil.jpg.jpg" alt="Wallace Monteiro">
+    </div>
+    <div class="sobre-text">
+      <h2>Sobre mim</h2>
+      <p>Sou estudante de Análise e Desenvolvimento de Sistemas e tenho grande paixão pela tecnologia e pelo desenvolvimento de soluções digitais. Ao longo da minha jornada, desenvolvi habilidades em Java POO, C#, HTML, CSS, JavaScript, Python, algoritmos, lógica de programação e suporte técnico, que me permitem atuar em diferentes áreas da tecnologia.
+
+Meus objetivos profissionais incluem trabalhar como desenvolvedorBack-end, front-end, full-stack, analista de sistemas, desenvolvedor de software ou Suporte sempre buscando aprender mais e evoluir em cada desafio.
+
+Sou uma pessoa organizada, criativa, dedicada e esforçada, com facilidade em aprender novas ferramentas e linguagens. Gosto de resolver problemas — dos mais simples aos mais complexos — e acredito que cada desafio é uma oportunidade de crescimento.</p>
+    </div>
+  </div>
+</section>
+
+<section id="projetos">
+  <h2>Meus Projetos</h2>
+  <div class="grid">
+    <div class="card">
+      <img src="https://via.placeholder.com/400x200" alt="Projeto 1">
+      <h3>Projeto 1</h3>
+      <p>Projeto focado em front-end moderno, responsivo e interativo.</p>
+      <div class="links"><a href="#" target="_blank">GitHub</a><a href="#" target="_blank">Live</a></div>
+    </div>
+    <div class="card">
+      <img src="https://via.placeholder.com/400x200" alt="Projeto 2">
+      <h3>Projeto 2</h3>
+      <p>Aplicativo web com integração API e design minimalista.</p>
+      <div class="links"><a href="#" target="_blank">GitHub</a><a href="#" target="_blank">Live</a></div>
+    </div>
+    <div class="card">
+      <img src="https://via.placeholder.com/400x200" alt="Projeto 3">
+      <h3>Projeto 3</h3>
+      <p>Sistema completo com dashboard interativo e responsivo.</p>
+      <div class="links"><a href="#" target="_blank">GitHub</a><a href="#" target="_blank">Live</a></div>
+    </div>
+  </div>
+</section>
+
+<section id="contato">
+  <h2>Contato</h2>
+  <div class="contato-container">
+    <div class="contato-item">
+      <a href="mailto:wallacexd550@gmail.com" target="_blank">
+        <img src="Imagens/gmail.png.png" alt="Email">
+        <p><strong>Email</strong></p>
+        <p>wallacexd550@gmail.com</p>
+      </a>
+    </div>
+    <div class="contato-item">
+      <a href="https://wa.me/5511996840501" target="_blank">
+        <img src="Imagens/whatsapp.png.jpg" alt="WhatsApp">
+        <p><strong>WhatsApp</strong></p>
+        <p>+55 11 99684-0501</p>
+      </a>
+    </div>
+    <div class="contato-item">
+      <a href="https://www.linkedin.com/in/wallacemonteirodev" target="_blank">
+        <img src="Imagens/linkedin.png.jpg" alt="LinkedIn">
+        <p><strong>LinkedIn</strong></p>
+        <p>/in/wallacemonteirodev</p>
+      </a>
+    </div>
+    <div class="contato-item">
+      <a href="https://github.com/wallacemonteirodev" target="_blank">
+        <img src="Imagens/github.png.png" alt="GitHub">
+        <p><strong>GitHub</strong></p>
+        <p>/wallacemonteirodev</p>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  © 2025 Wallace Monteiro | Desenvolvedor Web
+</footer>
+
+<button id="back-to-top" onclick="window.scrollTo({top:0, behavior:'smooth'})">↑</button>
+
+<script>
+  // Fade-in das seções
+  const sections = document.querySelectorAll('section');
+  const fadeSections = () => {
+    sections.forEach(sec => {
+      const rect = sec.getBoundingClientRect();
+      if(rect.top < window.innerHeight - 100) sec.classList.add('visible');
+    });
+  };
+  window.addEventListener('scroll', fadeSections);
+  fadeSections();
+
+  // Navbar scroll
+  const nav = document.querySelector('nav');
+  window.addEventListener('scroll', () => { nav.classList.toggle('scrolled', window.scrollY > 50); });
+
+  // Botão voltar ao topo
+  const backBtn = document.getElementById('back-to-top');
+  window.addEventListener('scroll', ()=>{ backBtn.style.display = window.scrollY > 200 ? 'block' : 'none'; });
+
+  // Link ativo no menu
+  const navLinks = document.querySelectorAll('.nav-link');
+  window.addEventListener('scroll', () => {
+    let fromTop = window.scrollY + 100;
+    navLinks.forEach(link => {
+      const section = document.querySelector(link.hash);
+      if(section.offsetTop <= fromTop && section.offsetTop + section.offsetHeight > fromTop){
+        link.classList.add('active');
+      } else {
+        link.classList.remove('active');
+      }
+    });
+  });
+
+  // PARTICULAS
+  const canvas = document.getElementById('particles');
+  const ctx = canvas.getContext('2d');
+  let w = canvas.width = window.innerWidth;
+  let h = canvas.height = window.innerHeight;
+
+  window.addEventListener('resize', () => { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; });
+
+  const particles = [];
+  const particleCount = 80;
+  for(let i=0;i<particleCount;i++){
+    particles.push({ x:Math.random()*w, y:Math.random()*h, r:Math.random()*3+1, dx:(Math.random()-0.5)*0.5, dy:(Math.random()-0.5)*0.5 });
+  }
+
+  function animate(){
+    ctx.clearRect(0,0,w,h);
+    for(let i=0;i<particles.length;i++){
+      let p = particles[i];
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle='rgba(255,255,255,0.08)';
+      ctx.fill();
+      p.x += p.dx;
+      p.y += p.dy;
+      if(p.x<0||p.x>w) p.dx*=-1;
+      if(p.y<0||p.y>h) p.dy*=-1;
+
+      for(let j=i+1;j<particles.length;j++){
+        let q = particles[j];
+        let dist = Math.hypot(p.x-q.x, p.y-q.y);
+        if(dist<100){
+          ctx.beginPath();
+          ctx.moveTo(p.x,p.y);
+          ctx.lineTo(q.x,q.y);
+          ctx.strokeStyle='rgba(255,255,255,'+(0.08-(dist/120))+')';
+          ctx.lineWidth=1;
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(animate);
+  }
+  animate();
+</script>
+
+</body>
+</html>
